@@ -29,7 +29,10 @@ class Room extends Component {
         this.setState({
           users: [...this.state.users, cardData.username],
         });
-        if (this.state.users[0] === this.state.username) {
+        if (
+          this.state.users[0] === this.state.username &&
+          cardData.username !== this.state.username
+        ) {
           props.ws.send(
             JSON.stringify({
               type: "shareState",

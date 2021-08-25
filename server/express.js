@@ -10,10 +10,7 @@ const serverPort = 5000,
 
 app.use(express.static(__dirname + "/build"));
 app.get("/", (req, res) =>
-  // res.sendFile(__dirname + "/build/index.html")
-  res.sendFile(
-    "/Users/carly/Documents/Code/megaport-tickets/build/index.html"
-  )
+  res.sendFile(__dirname + "/build/index.html")
 );
 
 //when a websocket connection is established

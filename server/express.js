@@ -8,6 +8,11 @@ const serverPort = 5000,
   WebSocket = require("ws"),
   websocketServer = new WebSocket.Server({ server });
 
+app.use(express.static(__dirname + "/public"));
+app.get("/", (req, res) =>
+  res.sendFile(__dirname + "/public/index.html")
+);
+
 //when a websocket connection is established
 websocketServer.on("connection", (webSocketClient) => {
   //send feedback to the incoming connection

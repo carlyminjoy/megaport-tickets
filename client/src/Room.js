@@ -31,6 +31,7 @@ class Room extends Component {
         this.setState({
           users: [...this.state.users, cardData.username],
         });
+      } else if (cardData?.connection) {
         if (
           this.state.users[0] === this.state.username &&
           cardData.username !== this.state.username
@@ -201,7 +202,7 @@ class Room extends Component {
                           ? this.newGame
                           : this.revealCards
                       }
-                      className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+                      className="shadow-md bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
                     >
                       {this.state.revealCards
                         ? "Play again?"

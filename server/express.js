@@ -1,6 +1,6 @@
 "use strict";
 
-const serverPort = 5000,
+const serverPort = process.env.PORT || 5000,
   http = require("http"),
   express = require("express"),
   app = express(),

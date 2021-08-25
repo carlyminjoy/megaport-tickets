@@ -6,6 +6,7 @@ class Room extends Component {
   constructor(props) {
     super(props);
     const user = this.getUserFromCookie();
+
     this.state = {
       yourCard: null,
       username: user,
@@ -17,6 +18,10 @@ class Room extends Component {
       count: 3,
       users: [],
     };
+
+    if (user) {
+      this.addUser();
+    }
 
     this.handleUserChange = this.handleUserChange.bind(this);
     this.handleUserSubmit = this.handleUserSubmit.bind(this);
@@ -33,7 +38,6 @@ class Room extends Component {
         this.setState({
           users: [...this.state.users, cardData.username],
         });
-      } else if (newConnection) {
         if (
           this.state.users[0] === this.state.username &&
           cardData.username !== this.state.username
@@ -101,13 +105,9 @@ class Room extends Component {
   };
 
   handleUserSubmit() {
-    console.log("1");
     this.setState({ hasUsername: true });
-    console.log("2");
-
     this.addUser();
     document.cookie = `username=${this.state.username}`;
-    console.log("3");
   }
 
   handleUserChange(event) {

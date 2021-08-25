@@ -1,0 +1,9 @@
+@import url("https://use.typekit.net/myq7mua.css");
+.App {
+  /* background-color: #6500d1; */
+  font-family: "Muli";
+}
+
+.Card:hover {
+  background-color: "#ff0000";
+}

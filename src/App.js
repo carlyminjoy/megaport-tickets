@@ -5,7 +5,7 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 import "./App.css";
 
 class App extends Component {
-  ws = new W3CWebSocket("ws://localhost:5000");
+  ws = new W3CWebSocket("ws://megaport-tickets.herokuapp.com:5000");
 
   render() {
     return (

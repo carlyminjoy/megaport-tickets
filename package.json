@@ -14,7 +14,7 @@
     "websocket": "^1.0.34"
   },
   "scripts": {
-    "start": "PORT=5001 craco start",
+    "start": "cd server && npm run server",
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject"

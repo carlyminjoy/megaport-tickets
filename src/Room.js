@@ -23,6 +23,7 @@ class Room extends Component {
 
     props.ws.onmessage = (message) => {
       const cardData = JSON.parse(message.data).message;
+
       if (cardData?.type === "cardChosen") {
         this.setCard(cardData);
       } else if (cardData?.type === "newUser") {
@@ -106,6 +107,7 @@ class Room extends Component {
   }
 
   addUser() {
+    console.log("adding me as user");
     this.props.ws.send(
       JSON.stringify({
         type: "newUser",

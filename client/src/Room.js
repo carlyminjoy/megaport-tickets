@@ -21,18 +21,19 @@ class Room extends Component {
     this.handleUserChange = this.handleUserChange.bind(this);
     this.handleUserSubmit = this.handleUserSubmit.bind(this);
 
-    props.ws.onmessage = (msg) => {
-      console.log("ws msg: ", msg);
-      const cardData = JSON.parse(msg.data);
-      const message = cardData?.message;
+    props.ws.onmessage = (event) => {
+      console.log("ws event: ", event);
+      const cardData = JSON.parse(event.data).message;
+      const newConnection =
+        JSON.parse(event.data).connection === "ok";
 
-      if (message?.type === "cardChosen") {
+      if (cardData?.type === "cardChosen") {
         this.setCard(cardData);
-      } else if (message?.type === "newUser") {
+      } else if (cardData?.type === "newUser") {
         this.setState({
           users: [...this.state.users, cardData.username],
         });
-      } else if (cardData.connection) {
+      } else if (newConnection) {
         if (
           this.state.users[0] === this.state.username &&
           cardData.username !== this.state.username
@@ -51,16 +52,16 @@ class Room extends Component {
             })
           );
         }
-      } else if (message?.type === "reveal") {
+      } else if (cardData?.type === "reveal") {
         this.countdown();
-      } else if (message?.type === "newGame") {
+      } else if (cardData?.type === "newGame") {
         this.setState({ yourCard: null });
         this.setState({ hasChosen: null });
         this.setState({ revealCards: false });
         this.setState({ allCards: [] });
       } else if (
-        message?.type === "shareState" &&
-        message?.to === this.state.username
+        cardData?.type === "shareState" &&
+        cardData?.to === this.state.username
       ) {
         this.setState({ allCards: cardData.state.allCards });
         this.setState({ revealCards: cardData.state.revealCards });

@@ -16,12 +16,12 @@ app.get("/", (req, res) =>
 //when a websocket connection is established
 websocketServer.on("connection", (webSocketClient) => {
   //send feedback to the incoming connection
-  webSocketClient.send('{ "connection" : "ok"}');
+  webSocketClient.send('{ "type" : "connected"}');
 
   //when a message is received
   webSocketClient.on("message", (message) => {
     websocketServer.clients.forEach((client) => {
-      client.send(`{ "message" : ${message} }`);
+      client.send(message);
     });
   });
 });

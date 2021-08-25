@@ -6,11 +6,11 @@ import "./App.css";
 
 const host =
   process.env.NODE_ENV === "development"
-    ? "localhost"
-    : "megaport-tickets.herokuapp.com";
+    ? "ws://localhost:5000"
+    : "wss://megaport-tickets.herokuapp.com";
 
 class App extends Component {
-  ws = new W3CWebSocket(`wss://${host}`);
+  ws = new W3CWebSocket(host);
 
   render() {
     console.log("process.env: ", process.env);

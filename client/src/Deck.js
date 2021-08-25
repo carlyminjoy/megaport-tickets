@@ -8,7 +8,7 @@ class Deck extends Component {
   }
 
   render() {
-    const { handleMsg, hasChosen } = this.props;
+    const { handleMsg, hasChosen, cardsRevealed } = this.props;
 
     return (
       <ul className="flex flex-wrap justify-center">
@@ -19,6 +19,7 @@ class Deck extends Component {
               handleMsg={handleMsg}
               key={num}
               hasChosen={hasChosen}
+              cardsRevealed={cardsRevealed}
             />
           );
         })}

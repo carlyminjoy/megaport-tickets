@@ -17,22 +17,22 @@ class ChosenCard extends Component {
           border: "3px solid #FF0000",
         }}
       >
-        {reveal && (
-          <h1
-            style={{
-              color: reveal ? "#FF0000" : "#F8F9FA",
-              fontSize: "60px",
-              fontWeight: "800",
-              lineHeight: "1",
-            }}
-          >
-            {id}
-          </h1>
-        )}
+        <h1
+          style={{
+            color: reveal ? "#FF0000" : "#F8F9FA",
+            fontSize: "60px",
+            fontWeight: "800",
+            lineHeight: "1",
+            transition: "1s ease",
+          }}
+        >
+          {reveal ? id : "?"}
+        </h1>
         <h3
           style={{
             color: reveal ? "#FF0000" : "#F8F9FA",
             fontWeight: 700,
+            transition: "1s ease",
           }}
         >
           {username}

@@ -4,6 +4,7 @@
   font-family: "Muli";
 }
 
-.Card:hover {
-  background-color: "#ff0000";
+.Card.hover-effects:hover {
+  background-color: rgba(255, 0, 0, 0.3) !important;
+  transform: scale(1.05);
 }

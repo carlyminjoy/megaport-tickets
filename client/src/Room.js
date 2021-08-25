@@ -8,7 +8,6 @@ class Room extends Component {
     const user = this.getUserFromCookie();
 
     this.state = {
-      yourCard: null,
       username: user,
       hasUsername: user !== "",
       hasChosen: null,
@@ -21,68 +20,83 @@ class Room extends Component {
 
     this.handleUserChange = this.handleUserChange.bind(this);
     this.handleUserSubmit = this.handleUserSubmit.bind(this);
-
-    props.ws.onmessage = (event) => {
-      console.log("ws event: ", event);
-      const cardData = JSON.parse(event.data).message;
-      const connected = JSON.parse(event.data).connection === "ok";
-
-      if (connected && user) {
-        this.addUser();
-      } else if (cardData?.type === "cardChosen") {
-        this.setCard(cardData);
-      } else if (cardData?.type === "newUser") {
-        this.setState({
-          users: [...this.state.users, cardData.username],
-        });
-        if (
-          this.state.users[0] === this.state.username &&
-          cardData.username !== this.state.username
-        ) {
-          props.ws.send(
-            JSON.stringify({
-              type: "shareState",
-              to: cardData.username,
-              state: {
-                allCards: this.state.allCards,
-                revealCards: this.state.revealCards,
-                revealing: this.state.revealing,
-                count: this.state.count,
-                users: this.state.users,
-              },
-            })
-          );
-        }
-      } else if (cardData?.type === "reveal") {
-        this.countdown();
-      } else if (cardData?.type === "newGame") {
-        this.setState({ yourCard: null });
-        this.setState({ hasChosen: null });
-        this.setState({ revealCards: false });
-        this.setState({ allCards: [] });
-      } else if (
-        cardData?.type === "shareState" &&
-        cardData?.to === this.state.username
-      ) {
-        this.setState({ allCards: cardData.state.allCards });
-        this.setState({ revealCards: cardData.state.revealCards });
-        this.setState({ revealing: cardData.state.revealing });
-        this.setState({ count: cardData.state.count });
-        this.setState({ users: cardData.state.users });
-      }
-    };
+    this.setupSocketEvents();
   }
 
-  getUserFromCookie() {
+  setupSocketEvents = () => {
+    this.props.ws.onmessage = (event) => {
+      const eventData = JSON.parse(event.data);
+      const actions = {
+        connected: this.addUser,
+        reveal: this.countdown,
+        newGame: this.setupNewGame,
+        newUser: this.handleNewUser,
+        cardChosen: this.setCard,
+        shareState: this.shareState,
+      };
+      console.log("eventData: ", eventData);
+      actions[eventData.type](eventData);
+    };
+  };
+
+  shareState = (eventData) => {
+    this.setState({ allCards: eventData.state.allCards });
+    this.setState({ revealCards: eventData.state.revealCards });
+    this.setState({ revealing: eventData.state.revealing });
+    this.setState({ count: eventData.state.count });
+    this.setState({ users: eventData.state.users });
+  };
+
+  setupNewGame = () => {
+    this.setState({ hasChosen: null });
+    this.setState({ revealCards: false });
+    this.setState({ allCards: [] });
+  };
+
+  handleNewUser = (eventData) => {
+    this.setState({
+      users: [...this.state.users, eventData.username],
+    });
+
+    if (eventData.username !== this.state.username) {
+      this.props.ws.send(
+        JSON.stringify({
+          type: "shareState",
+          to: eventData.username,
+          state: {
+            allCards: this.state.allCards,
+            revealCards: this.state.revealCards,
+            revealing: this.state.revealing,
+            count: this.state.count,
+            users: this.state.users,
+          },
+        })
+      );
+    }
+  };
+
+  getUserFromCookie = () => {
     let decodedCookie = decodeURIComponent(document.cookie);
     let properties = decodedCookie.split(";");
     const userCookie = properties.find((p) => p.includes("username"));
     return userCookie ? userCookie.split("=")[1] : "";
-  }
+  };
 
   setCard = (card) => {
-    this.setState({ yourCard: card });
-    this.setState({ allCards: [...this.state.allCards, card] });
+    let found = false;
+
+    this.state.allCards.forEach((c, i) => {
+      if (c.username === card.username) {
+        let newCardsList = this.state.allCards;
+        newCardsList[i] = card;
+        this.setState({ allCards: newCardsList });
+        found = true;
+      }
+    });
+
+    if (!found) {
+      this.setState({ allCards: [...this.state.allCards, card] });
+    }
   };
 
   revealCards = () => {
@@ -101,27 +115,27 @@ class Room extends Component {
     );
   };
 
-  handleUserSubmit() {
+  handleUserSubmit = () => {
     this.setState({ hasUsername: true });
     this.addUser();
     document.cookie = `username=${this.state.username}`;
-  }
+  };
 
-  handleUserChange(event) {
+  handleUserChange = (event) => {
     this.setState({ username: event.target.value });
-  }
+  };
 
-  addUser() {
-    console.log("adding me as user");
+  addUser = () => {
+    if (!this.state?.username) return;
     this.props.ws.send(
       JSON.stringify({
         type: "newUser",
         username: this.state.username,
       })
     );
-  }
+  };
 
-  countdown() {
+  countdown = () => {
     this.setState({ revealing: true });
     const timer = setInterval(() => {
       if (this.state.count === 1) {
@@ -132,44 +146,67 @@ class Room extends Component {
       }
       this.setState({ count: this.state.count - 1 });
     }, 1000);
-  }
+  };
+
+  chooseCard = (id) => {
+    this.props.ws.send(
+      JSON.stringify({
+        type: "cardChosen",
+        id: id,
+        username: this.state.username,
+      })
+    );
+    this.setState({ hasChosen: id });
+  };
 
   render() {
-    const chooseCard = (id) => {
-      this.props.ws.send(
-        JSON.stringify({
-          type: "cardChosen",
-          id: id,
-          username: this.state.username,
-        })
-      );
-      this.setState({ hasChosen: id });
-    };
+    const userForm = (
+      <form
+        className="w-full flex justify-center"
+        onSubmit={this.handleUserSubmit}
+      >
+        <div className="flex items-center justify-center border-b border-gray-300 py-2 max-w-sm">
+          <input
+            className="bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+            placeholder="Name"
+            type="text"
+            value={this.state.username}
+            onChange={this.handleUserChange}
+          />
+          <button
+            className="shadow-md bg-purple-500 border-purple-500 border-4 text-white py-1 px-2 rounded"
+            type="submit"
+          >
+            Let me in
+          </button>
+        </div>
+      </form>
+    );
+
+    const playButton = (
+      <div className="h-16">
+        <button
+          onClick={
+            this.state.revealCards ? this.newGame : this.revealCards
+          }
+          className="shadow-md bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+        >
+          {this.state.revealCards ? "Go again" : "Everybody's in"}
+        </button>
+      </div>
+    );
 
     return (
-      <div className="p-8">
-        {!this.state.hasUsername && (
-          <form
-            className="w-full flex justify-center"
-            onSubmit={this.handleUserSubmit}
-          >
-            <div className="flex items-center justify-center border-b border-gray-300 py-2 max-w-sm">
-              <input
-                className="bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
-                placeholder="Name"
-                type="text"
-                value={this.state.username}
-                onChange={this.handleUserChange}
-              />
-              <button
-                className="flex-shrink-0 bg-purple-500 hover:bg-purple-700 border-purple-500 hover:border-purple-700 text-sm border-4 text-white py-1 px-2 rounded"
-                type="submit"
-              >
-                Let me in
-              </button>
-            </div>
-          </form>
-        )}
+      <div
+        className="p-4"
+        style={{
+          maxWidth: "1200px",
+          width: "100%",
+          margin: "0 auto",
+        }}
+      >
+        {!this.state.hasUsername && userForm}
+
         {this.state.hasUsername && (
           <div>
             <div
@@ -178,8 +215,9 @@ class Room extends Component {
             >
               <div className="flex justify-center items-center">
                 {this.state.allCards.length === 0 && (
-                  <h1 className="center">Someone make a move!</h1>
+                  <h1 className="center">Pick a card</h1>
                 )}
+
                 {this.state.allCards.length > 0 &&
                   this.state.allCards.map((card) => {
                     return (
@@ -192,31 +230,29 @@ class Room extends Component {
                     );
                   })}
               </div>
+
               {!this.state.revealing &&
-                this.state.allCards.length > 0 && (
-                  <div className="h-16">
-                    <button
-                      onClick={
-                        this.state.revealCards
-                          ? this.newGame
-                          : this.revealCards
-                      }
-                      className="shadow-md bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                      {this.state.revealCards
-                        ? "Play again?"
-                        : "Everybody's in!"}
-                    </button>
-                  </div>
-                )}
+                this.state.allCards.length > 0 &&
+                playButton}
+
               {this.state.revealing && (
                 <div className="h-16">
-                  <h1>{this.state.count}</h1>
+                  <h1
+                    style={{
+                      color: "#6500d1",
+                      fontWeight: "700",
+                      fontSize: "2rem",
+                    }}
+                  >
+                    {this.state.count}
+                  </h1>
                 </div>
               )}
             </div>
+
             <Deck
-              handleMsg={chooseCard}
+              cardsRevealed={this.state.revealCards}
+              handleMsg={this.chooseCard}
               hasChosen={this.state.hasChosen}
             />
           </div>

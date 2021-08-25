@@ -19,20 +19,17 @@ class Room extends Component {
       users: [],
     };
 
-    if (user) {
-      this.addUser();
-    }
-
     this.handleUserChange = this.handleUserChange.bind(this);
     this.handleUserSubmit = this.handleUserSubmit.bind(this);
 
     props.ws.onmessage = (event) => {
       console.log("ws event: ", event);
       const cardData = JSON.parse(event.data).message;
-      const newConnection =
-        JSON.parse(event.data).connection === "ok";
+      const connected = JSON.parse(event.data).connection === "ok";
 
-      if (cardData?.type === "cardChosen") {
+      if (connected && user) {
+        this.addUser();
+      } else if (cardData?.type === "cardChosen") {
         this.setCard(cardData);
       } else if (cardData?.type === "newUser") {
         this.setState({

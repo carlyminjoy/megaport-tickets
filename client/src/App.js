@@ -10,7 +10,7 @@ const host =
     : "megaport-tickets.herokuapp.com";
 
 class App extends Component {
-  ws = new W3CWebSocket(`wss://${host}:5000`);
+  ws = new W3CWebSocket(`wss://${host}`);
 
   render() {
     console.log("process.env: ", process.env);

@@ -40,11 +40,11 @@ class Room extends Component {
               type: "shareState",
               to: cardData.username,
               state: {
-                allCards: [],
-                revealCards: false,
-                revealing: false,
-                count: 3,
-                users: [],
+                allCards: this.state.allCards,
+                revealCards: this.state.revealCards,
+                revealing: this.state.revealing,
+                count: this.state.count,
+                users: this.state.users,
               },
             })
           );

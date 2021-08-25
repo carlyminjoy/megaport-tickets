@@ -9,7 +9,7 @@ class Room extends Component {
     this.state = {
       yourCard: null,
       username: user,
-      hasUsername: !!user,
+      hasUsername: user !== "",
       hasChosen: null,
       allCards: [],
       revealCards: false,
@@ -22,6 +22,7 @@ class Room extends Component {
     this.handleUserSubmit = this.handleUserSubmit.bind(this);
 
     props.ws.onmessage = (message) => {
+      console.log("ws message: ", message);
       const cardData = JSON.parse(message.data).message;
 
       if (cardData?.type === "cardChosen") {
@@ -97,9 +98,13 @@ class Room extends Component {
   };
 
   handleUserSubmit() {
+    console.log("1");
     this.setState({ hasUsername: true });
+    console.log("2");
+
     this.addUser();
     document.cookie = `username=${this.state.username}`;
+    console.log("3");
   }
 
   handleUserChange(event) {

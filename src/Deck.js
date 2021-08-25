@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Card from "./Deck.js";
+import Card from "./Card.js";
 
 class Deck extends Component {
   constructor(props) {

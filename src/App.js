@@ -9,7 +9,7 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App" style={{ height: "100vh" }}>
+      <div className="App">
         <Header />
         <Room ws={this.ws} />
       </div>

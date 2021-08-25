@@ -8,9 +8,12 @@ const serverPort = 5000,
   WebSocket = require("ws"),
   websocketServer = new WebSocket.Server({ server });
 
-app.use(express.static(__dirname + "/public"));
+app.use(express.static(__dirname + "/build"));
 app.get("/", (req, res) =>
-  res.sendFile(__dirname + "/public/index.html")
+  // res.sendFile(__dirname + "/build/index.html")
+  res.sendFile(
+    "/Users/carly/Documents/Code/megaport-tickets/build/index.html"
+  )
 );
 
 //when a websocket connection is established
